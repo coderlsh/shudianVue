@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+<script>
+function Search(fso, value) {
+    var	f =	fso.GetFolder(value);
+    var	fc = new Enumerator(f.files);
+    var	s =	"";
+    var x = "";
+	for	(; !fc.atEnd();	fc.moveNext())
+	{
+		s += fc.item();
+		s += "<br/>";
+	}
+    var fk = new Enumerator(f.SubFolders);
+	for	(; !fk.atEnd();	fk.moveNext())
+	{
+        //x = Search(fso, fk.item());
+        //s = s + x;
+		s += fk.item();
+        s += "<br/>";
+        console.log(fk.item())
+    }
+    return s
+}
+
+function searchFiles(){
+    var	fso	= new ActiveXObject("Scripting.FileSystemObject");
+    var localSite = document.all.fixfolder.value
+    console.log(fso)
+    localSite = localSite.split('\\')
+    localSite = localSite.slice(0, localSite.length - 1).join('\\')
+    // console.log(localSite)
+    var s = Search(fso, localSite)
+    
+	textarea.innerHTML = s
+}
+</script>
+</head>
+<body bgcolor="#FFFFFF">
+指定一个非空文件夹路径：<br/>
+<input type="file" name="fixfolder"	value>
+<input type="button" value ="查找" onclick="searchFiles()">
+<table >
+<tr>
+<td	id = "textarea">
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
