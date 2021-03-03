@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div id="containBox" ref="containBox" class="container">
       <div class="left"></div>
       <div class="center">
         <a-tabs class="table-container" default-active-key="1" style="top: 20px;margin: 0 auto;">
@@ -7,7 +7,7 @@
                 <div class="export-msg">张力场位于{{tracPosition1}}侧，张力机出口张力为：{{exportT1}} N，
                     控制档档号为：{{firstGear}}，
                     牵引机最大牵引力为：{{Tmax1}} N
-                    <a-button @click="drawLine" type="primary" style="margin-left:10px;top: -2px">查看绘图</a-button>
+                    <a-button @click="drawLine" :disabled="drawFlag" type="primary" style="margin-left:10px;top: -2px">查看绘图</a-button>
                     <a-button @click="reDraw" type="primary" style="margin-left:10px;top: -2px">重新绘图</a-button>
                 </div>
                 <a-table class="table1" :columns="columns1" 
@@ -19,7 +19,7 @@
                 <div class="export-msg">张力场位于{{tracPosition2}}侧，张力机出口张力为：{{exportT2}} N，
                     控制档档号为：{{secondGear}}，
                     牵引机最大牵引力为：{{Tmax2}} N
-                    <a-button @click="drawLine" type="primary" style="margin-left:20px;top: -2px">查看绘图</a-button>
+                    <a-button @click="drawLine" :disabled="drawFlag" type="primary" style="margin-left:20px;top: -2px">查看绘图</a-button>
                     <a-button @click="reDraw" type="primary" style="margin-left:10px;top: -2px">重新绘图</a-button>
                 </div>
                 <a-table class="table1" :columns="columns2" 
@@ -346,7 +346,9 @@ const columns2 = [
           realList2: [],
           realList22: [],
 
-          repaint: false
+          repaint: false,
+
+          drawFlag: false
       }
     },
     created() {
@@ -377,6 +379,9 @@ const columns2 = [
         }else {
             this.isShow1 = false
         }
+        this.$store.commit('getColumsName', {name: 'colums1', colums: columns1})
+        this.$store.commit('getColumsName', {name: 'colums2', colums: columns2})
+        // console.log(this.$store.state)
     },
     computed: {
         tracPosition1() {
@@ -459,6 +464,25 @@ const columns2 = [
         // this.getAllLeashHorizontalTension()
         // //this.getXArray()
         // this.getXAndY()
+        let elementResizeDetectorMaker = require("element-resize-detector");
+        //监听元素变化
+        let erd = elementResizeDetectorMaker();
+        let that = this;
+        erd.listenTo(document.getElementById("containBox"), function (element) {
+            that.$nextTick(function () {
+                //使echarts尺寸重置
+                let containHeight = this.$refs.containBox.offsetWidth
+                let changeWidth = document.getElementsByClassName("center")[0].offsetWidth
+                let changeNum = containHeight / changeWidth
+                if(changeNum >= 1){
+                    document.getElementsByClassName("center")[0].style.zoom = 1
+                }else{
+                    document.getElementsByClassName("center")[0].style.zoom = containHeight / changeWidth
+                }
+                // console.log('width',containHeight,changeWidth)
+            })
+        })
+
         document.getElementById("MxDrawXCtrl").ImplementCommandEventFun = this.DoCommandEventFunc
         if(this.$store.state.showStep == true) {
           this.$store.commit('showWizardStep', false)
@@ -481,6 +505,7 @@ const columns2 = [
                 
                 this.isShow1 = false
                 this.showSafeWarning = true
+                this.drawFlag = false
                 this.preMsg.n = item.tracWay1
                 this.preMsg2.n = item.tracWay2
                 this.position1 = item.value1 == 2 ? '右' : '左'
@@ -989,6 +1014,9 @@ const columns2 = [
                    let realY = preMsg.realXandY[i].y - 1000 * y / this.K_y
                    let realX = preMsg.realXandY[i].x - 0 + 1000 * item / Number(this.k_x)
                    let realY2 = preMsg.realXandY[i].y - 1000 * y2 / this.K_y
+                   if(isNaN(realX) || isNaN(realY) || isNaN(realY2)){
+                       this.drawFlag = true
+                   }
                    //console.log('xy',realX, preMsg.realXandY[i].x,position)
                    if(position == 2) {
                         realList.push({
@@ -1015,6 +1043,9 @@ const columns2 = [
                })
                realDataList.push(realList)
                realDataList2.push(realList2)
+            }
+            if(this.drawFlag){
+                this.$message.error("存在NaN值，计算不合理，请重新选取控制点或放线方向")
             }    
             
             console.log('Xarray:',realDataList2,realDataList)
@@ -1052,7 +1083,7 @@ const columns2 = [
                     if(extraCoord[i].coordinatePosition !== "中" && extraCoord[i+1].coordinatePosition !== "中") {
                         continue
                     }else {
-                        dataItem['name'] = extraCoord[i].name + '-' + extraCoord[i+1].name
+                        dataItem['name'] = extraCoord[i].name + '--' + extraCoord[i+1].name
                         dataItem['traction'] = this.tractionList1[j].toFixed(2)
                         dataItem['leashedHorizontalTension'] = this.leashedHorizontalTension1[j].toFixed(2)
                         dataItem['leashedlineLength'] = this.leashedlineLength1[j].toFixed(2)
@@ -1153,7 +1184,7 @@ const columns2 = [
                     if(extraCoord[i].coordinatePosition !== "中" && extraCoord[i+1].coordinatePosition !== "中") {
                         continue
                     }else {
-                        dataItem['name'] = extraCoord[i].name + '-' + extraCoord[i+1].name
+                        dataItem['name'] = extraCoord[i].name + '--' + extraCoord[i+1].name
                         dataItem['traction'] = this.tractionList2[j].toFixed(2)
                         dataItem['leashedHorizontalTension'] = this.leashedHorizontalTension2[j].toFixed(2)
                         dataItem['leashedlineLength'] = this.leashedlineLength2[j].toFixed(2)
@@ -1221,14 +1252,25 @@ const columns2 = [
                 this.repaint = !this.repaint
                 document.getElementById("MxDrawXCtrl").ImplementCustomEvent = this.CustomEvent1;
                 document.getElementById("MxDrawXCtrl").DoCommand(607)
-                this.$store.commit('visibleAble', false)
-                this.$store.commit('getRepaint', this.repaint)
+                // this.$store.commit('visibleAble', false)
+                // this.$store.commit('getRepaint', this.repaint)
+                setTimeout(() => {
+                    console.log('start')
+                     this.$store.commit('visibleAble', false)
+                    this.$store.commit('getRepaint', this.repaint)
+                    console.log('ending')
+                }, 300)
             }else {
                 this.$store.commit('visibleAble', false)
             }
             
             //document.getElementById("MxDrawXCtrl").DoCommand(602)
         },
+
+        // dosome(){
+        //     console.log('ining...')
+        //     document.getElementById("MxDrawXCtrl").DoCommand(Number(this.index))
+        // },
 
         reDraw() {
             this.isShow1 = true
@@ -1674,6 +1716,26 @@ const columns2 = [
   /* height: 100vh */
   /* background-color: green; */
 }
+
+/* @media screen and (min-width: 1024px) and (max-width: 1279px) {
+  .center{
+    zoom: 0.6;
+  }
+}
+
+@media screen and (min-width: 1280px) and (max-width: 1439px) {
+  .center{
+    zoom: 0.783;
+  }
+}
+
+@media screen and (min-width: 1440px) and (max-width: 1599px) {
+  .center{
+    zoom: 0.897;
+  }
+} */
+
+
 
 .export-msg {
     position: absolute;

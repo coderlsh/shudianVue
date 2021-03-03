@@ -4,7 +4,7 @@
             :show1=false
             next='groundWireParam'
         ></wizard-step>
-        <a-card title="选取导线规格" :bordered="false" style="width: 80%;top: 10px;margin: 0 auto;">
+        <a-card class="containerScale" title="选取导线规格" :bordered="false" style="width: 80%;top: 10px;margin: 0 auto;">
             <div>
                 <a-button class="mr-10" @click="addItem" type="primary">添加</a-button>
                 <a-button class="mr-10 file-open" type="primary">批量导入
@@ -339,4 +339,11 @@ import { export_to_csv } from 'common/utils/exportData.js'
     opacity: 0;
     cursor: pointer;
     }
+
+    @media screen and (min-width: 1024px) and (max-width: 1279px) {
+        .containerScale{
+            zoom: 0.7;
+        }
+    }
+    
 </style>

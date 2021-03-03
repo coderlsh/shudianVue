@@ -47,6 +47,9 @@ export default new Vuex.Store({
         unfinshed1: true,
         unfinshed2: true,
         unfinshed3: true,
+
+        colums1: [],
+        colums2: []
     },
     mutations: {
         visibleAble(state, visible){
@@ -262,6 +265,14 @@ export default new Vuex.Store({
                 state.showStep= false
 
                 state.caluDisable= true
+            }
+        },
+
+        getColumsName(state, data){
+            if(data.name == 'colums1'){
+                state.colums1 = data.colums
+            }else{
+                state.colums2 = data.colums
             }
         }
     }

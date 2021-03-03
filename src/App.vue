@@ -17,6 +17,14 @@ export default {
     screenHead
   },
   mounted() {
+    
+    // var i = document.getElementsByTagName("meta");
+    // if(window.screen.width < 2920){
+    //   i[2]['content'] = 'width=1760, initial-scale=1.0, maximum-scale=1.0,minimum-scale=1.0, user-scalable=0'
+    // }
+
+    // console.log('meta',i,window.screen.width)
+    
     if(localStorage.getItem('extraCoord') == null){
       console.log('start localStorage extraCoord')
       localStorage.setItem('extraCoord', "[]");
@@ -26,6 +34,8 @@ export default {
       localStorage.setItem('controlPoint', "[]");
     }
     window.addEventListener('beforeunload',e => this.set() )
+    //window.addEventListener('load', this.adaptation);
+    //window.addEventListener('resize', this.adaptation);
   },
   methods: {
     set(){
@@ -39,6 +49,23 @@ export default {
         localStorage.setItem('controlPoint', JSON.stringify(controlPoint));
       }
     },
+    // adaptation () {
+    //   var w = document.body.clientWidth;
+    //   var h = document.body.clientHeight;
+    //   let nw = 1920;
+    //   let nh = 1080;
+    //   var left, top, scale;
+    //   if (w / h > nw / nh) {
+    //     scale = 1;
+    //     top = 0;
+    //     left = (w - nw * scale) / 2;
+    //   } else {
+    //     scale = 1;
+    //     left = 0;
+    //     top = (h - nh * scale) / 2;
+    //   }
+    //   document.getElementById('app').setAttribute('style', 'transform: scale('+ scale +');left:'+left+'px;top:'+top+'px;');
+    // }
   },
 }
 </script>

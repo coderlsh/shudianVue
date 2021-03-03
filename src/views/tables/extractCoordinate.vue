@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="containBox" ref="containBox">
     <div class="left"></div>
     <div class="center">
       <wizard-step
@@ -185,7 +185,9 @@ import { export_to_csv } from 'common/utils/exportData.js'
 
           exportActive: false,
           toPath: '',
-          changePathFlag: false
+          changePathFlag: false,
+
+          index: 1
       }
     },
     computed: {
@@ -214,6 +216,25 @@ import { export_to_csv } from 'common/utils/exportData.js'
       },
     },
     mounted() {
+      let elementResizeDetectorMaker = require("element-resize-detector");
+      //监听元素变化
+      let erd = elementResizeDetectorMaker();
+      let that = this;
+      erd.listenTo(document.getElementById("containBox"), function (element) {
+          that.$nextTick(function () {
+              //使echarts尺寸重置
+              let containHeight = this.$refs.containBox.offsetWidth
+              let changeWidth = document.getElementsByClassName("center")[0].offsetWidth
+              let changeNum = containHeight / changeWidth
+              if(changeNum >= 1){
+                document.getElementsByClassName("center")[0].style.zoom = 1
+              }else{
+                document.getElementsByClassName("center")[0].style.zoom = containHeight / changeWidth
+              }
+              // console.log('width',containHeight,changeWidth)
+          })
+      })
+
       document.getElementById("MxDrawXCtrl").ImplementCommandEventFun = this.DoCommandEventFunc  
       this.dataSource = this.$store.state.extraCoord  
       this.key = this.getMaxKey()
@@ -312,7 +333,17 @@ import { export_to_csv } from 'common/utils/exportData.js'
       // 添加，删除，重新取点
       getPoint(index) {
         this.$store.commit('visibleAble', false)
-        document.getElementById("MxDrawXCtrl").DoCommand(Number(index));
+        this.index = index
+        setTimeout(() => {
+          console.log('start')
+          this.dosome()
+          console.log('ending')
+        }, 300)
+      },
+
+      dosome(){
+        console.log('ining...')
+        document.getElementById("MxDrawXCtrl").DoCommand(Number(this.index))
       },
 
       // 导出数据
@@ -511,4 +542,28 @@ import { export_to_csv } from 'common/utils/exportData.js'
   /* height: 100vh */
   /* background-color: green; */
 }
+
+/* @media screen and (min-width: 1024px) and (max-width: 1279px) {
+  .center{
+    zoom: 0.563;
+  }
+}
+
+@media screen and (min-width: 1280px) and (max-width: 1439px) {
+  .center{
+    zoom: 0.734;
+  }
+}
+
+@media screen and (min-width: 1440px) and (max-width: 1599px) {
+  .center{
+    zoom: 0.842;
+  }
+}
+
+@media screen and (min-width: 1600px) and (max-width: 1699px) {
+  .center{
+    zoom: 0.95;
+  }
+} */
 </style>

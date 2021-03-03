@@ -62,7 +62,9 @@ import wizardStep from 'components/wizardStep/wizardStep.vue'
         point2: {},
 
         realHorizontalDist: 800,
-        realLongitudinalDist: 2.5
+        realLongitudinalDist: 2.5,
+
+        index: 1
       }
     },
     
@@ -98,9 +100,25 @@ import wizardStep from 'components/wizardStep/wizardStep.vue'
     methods: {
       getPoint(index) {
         this.$store.commit('visibleAble', false)
-        console.log(Number(index))
-        document.getElementById("MxDrawXCtrl").DoCommand(Number(index));
+        this.index = index
+        let timeId = setTimeout(() => {
+          console.log('start')
+          this.dosome()
+          clearTimeout(timeId)
+          console.log('ending')
+        }, 300)
+
+
+        // this.$store.commit('visibleAble', false)
+        // console.log(Number(index))
+        // document.getElementById("MxDrawXCtrl").DoCommand(Number(index));
       },
+
+      dosome(){
+        console.log('ining...')
+        document.getElementById("MxDrawXCtrl").DoCommand(Number(this.index))
+      },
+
       DoCommandEventFunc(iCmd){
             if (iCmd == 1) 
             {

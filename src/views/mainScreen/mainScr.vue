@@ -42,9 +42,9 @@
                     <a-menu-item key="tractor">
                         牵引机
                     </a-menu-item>
-                    <a-menu-item key="groundAnchor">
+                    <!-- <a-menu-item key="groundAnchor">
                         地锚
-                    </a-menu-item>
+                    </a-menu-item> -->
                 </a-sub-menu>
             </a-sub-menu>
             <a-sub-menu :disabled='disable' key="sub3">
@@ -93,9 +93,17 @@
             <a-sub-menu :disabled='disable' key="sub7">
                 <span slot="title" class="submenu-title-wrapper">
                     <a-icon type="setting" />输出</span>
-                    <a-menu-item key="forceCalculationTable">
+                    <a-menu-item-group key="forceCalculationTable" title="受力计算结果表">
+                        <a-menu-item @click="getForceCalculationTable1" key="forceOUT1">
+                            输出一级受力计算表
+                        </a-menu-item>
+                        <a-menu-item @click="getForceCalculationTable2" key="forceOUT2">
+                            输出二级受力计算表
+                        </a-menu-item>
+                    </a-menu-item-group>
+                    <!-- <a-menu-item @click="getForceCalculationTable" key="forceCalculationTable">
                         受力计算结果表
-                    </a-menu-item>
+                    </a-menu-item> -->
                     <a-menu-item key="towingRopeConfigTable">
                         牵引绳配置表
                     </a-menu-item>
@@ -163,12 +171,12 @@
             <a-menu-item key="controlPoint" :disabled='disable'> <a-icon type="appstore" />控制点设置</a-menu-item>
             <a-menu-item key="exhibitionObject" :disabled='disable'> <a-icon type="appstore" />展放对象</a-menu-item>
             <a-menu-item key="stretCalculation" :disabled='disable'> <a-icon type="appstore" />牵展</a-menu-item>
-            <a-menu-item key="app9" :disabled='disable'> <a-icon type="appstore" />结果输出</a-menu-item>
+            <!-- <a-menu-item key="app9" :disabled='disable'> <a-icon type="appstore" />结果输出</a-menu-item> -->
             <a-menu-item key="startWizard" :disabled='disable'> <a-icon type="appstore" />启动向导</a-menu-item>
             <a-menu-item key="tensionMachine" :disabled='disable'> <a-icon type="appstore" />张力机</a-menu-item>
             <a-menu-item key="tractor" :disabled='disable'> <a-icon type="appstore" />牵引机</a-menu-item>
             <!-- <a-menu-item key="groundAnchor" :disabled='disable'> <a-icon type="appstore" />地锚参数</a-menu-item> -->
-            <a-menu-item key="app14" :disabled='disable'> <a-icon type="appstore" />切换级数</a-menu-item>
+            <!-- <a-menu-item key="app14" :disabled='disable'> <a-icon type="appstore" />切换级数</a-menu-item> -->
             <a-menu-item @click="getPoint(105)" key="app15" :disabled='disable'> <a-icon type="appstore" />保存图纸</a-menu-item>
             <a-menu-item @click="getPoint(106)" key="app16" :disabled='disable'> <a-icon type="appstore" />打印图纸</a-menu-item>
             </a-menu>
@@ -219,13 +227,14 @@
 
 import confirmModal from './modal/confirmModal'
 
+import { export_to_csv } from 'common/utils/exportData.js'
 
   export default {
     name:"mainScr",
     data () {
       return {
-        disable: false,
-        openDwgDisable: false,
+        disable: true,
+        openDwgDisable: true,
 
         //caluDisable: true,
         
@@ -791,6 +800,65 @@ import confirmModal from './modal/confirmModal'
             this.$store.commit('visibleAble', false)
             //this.changePathFlag = true
             //this.$router.replace(this.toPath)
+        },
+
+        getForceCalculationTable1(){
+            if(this.$store.state.tableData1.length !== 0){
+                let heads = []
+                let columns = []
+                columns = this.$store.state.colums1
+                columns.forEach( item => {
+                    let obj = {}
+                    obj['title'] = item.title
+                    obj['key'] = item.dataIndex
+                    heads.push(obj)
+                })
+                let data = []    // 表格的内容
+                let arrNew = this.$store.state.tableData1
+                for(let i=0; i<arrNew.length; i++) {
+                    let obj = arrNew[i];
+                    let pushObj = {} // 每行都是obj
+                    columns.forEach( item => {
+                        let name = item.dataIndex 
+                        pushObj[name]=obj[name]
+                    })
+                    data.push(pushObj)
+                }
+                let fileName = '一级放线受力结果表'
+                export_to_csv(heads, data, fileName)
+            }else{
+                this.$message.warning('没有一级放线计算数据，请先进行计算')
+            }
+        },
+
+        getForceCalculationTable2(){
+            if(this.$store.state.tableData2.length !== 0){
+                let heads = []
+                let columns = []
+                columns = this.$store.state.colums2
+                columns.forEach( item => {
+                    let obj = {}
+                    obj['title'] = item.title
+                    obj['key'] = item.dataIndex
+                    heads.push(obj)
+                })
+                let data = []    // 表格的内容
+                let arrNew = this.$store.state.tableData2
+                for(let i=0; i<arrNew.length; i++) {
+                    let obj = arrNew[i];
+                    let pushObj = {} // 每行都是obj
+                    columns.forEach( item => {
+                        let name = item.dataIndex 
+                        pushObj[name]=obj[name]
+                    })
+                    data.push(pushObj)
+                }
+
+                let fileName = '二级放线受力结果表'
+                export_to_csv(heads, data, fileName)
+            }else{
+                this.$message.warning('没有二级放线计算数据，请先进行计算')
+            }
         },
 
         // test

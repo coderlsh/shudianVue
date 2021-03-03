@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="containBox1" ref="containBox1">
       <div class="left"></div>
       <div class="center">
         <wizard-step
@@ -372,6 +372,27 @@ import { export_to_csv } from 'common/utils/exportData.js'
         wizardStep
     },
     mounted() {
+
+
+      let elementResizeDetectorMaker = require("element-resize-detector");
+      //监听元素变化
+      let erd = elementResizeDetectorMaker();
+      let that = this;
+      erd.listenTo(document.getElementById("containBox1"), function (element) {
+          that.$nextTick(function () {
+              //使echarts尺寸重置
+              let containHeight = this.$refs.containBox1.offsetWidth
+              let changeWidth = document.getElementsByClassName("center")[0].offsetWidth
+              let changeNum = containHeight / changeWidth
+              if(changeNum >= 1){
+                document.getElementsByClassName("center")[0].style.zoom = 1
+              }else{
+                document.getElementsByClassName("center")[0].style.zoom = containHeight / changeWidth
+              }
+              // console.log('width',containHeight,changeWidth)
+          })
+      })
+
       document.getElementById("MxDrawXCtrl").ImplementCommandEventFun = this.DoCommandEventFunc
       this.wireDataSource = this.$store.state.exhibitObjectEdiTable
       this.wireListTotal = this.wireDataSource.length     
@@ -390,6 +411,8 @@ import { export_to_csv } from 'common/utils/exportData.js'
         
         //console.log('11111',this.selectedRows1,this.selectedRowKeys1)
       }
+
+     
      
     },
     methods: {
@@ -635,5 +658,17 @@ import { export_to_csv } from 'common/utils/exportData.js'
   /* height: 100vh */
   /* background-color: green; */
 }
+
+/* @media screen and (min-width: 1024px) and (max-width: 1279px) {
+  .center{
+    zoom: 0.706;
+  }
+}
+
+@media screen and (min-width: 1280px) and (max-width: 1439px) {
+  .center{
+    zoom: 0.92;
+  }
+} */
 
 </style>
